@@ -12,8 +12,8 @@ steps:
     inputs:
       command: test
       projects: "**/*tests.csproj"
-      arguments: '--configuration $(BuildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./coverage/opencover.xml  
-
+      arguments: '--configuration $(BuildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./coverage/opencover.xml'
+  
   - task: DotNetCoreCLI@2
     displayName: Publish
     inputs:
@@ -25,5 +25,4 @@ steps:
   - task: PublishBuildArtifacts@1
     displayName: "Publish Artifact: $(Build.DefinitionName)-Artifact"
     inputs:
-      ArtifactName: "$(Build.DefinitionName)-Artifact"      
-
+      ArtifactName: "$(Build.DefinitionName)-Artifact"
