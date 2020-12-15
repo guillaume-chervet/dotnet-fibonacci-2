@@ -1,34 +1,29 @@
-# ASP.NET Core (.NET Framework)
-# Build and test ASP.NET Core projects targeting the full .NET Framework.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
-
-trigger:
-- main
-
 pool:
-  vmImage: 'windows-latest'
-
-variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+  vmImage: "Ubuntu 16.04"
 
 steps:
-- task: NuGetToolInstaller@1
+  - task: DotNetCoreInstaller@0
+    displayName: "Use .NET Core sdk 5.0.101"
+    inputs:
+      version: 5.0.101
 
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
+  - task: DotNetCoreCLI@2
+    displayName: "dotnet test"
+    inputs:
+      command: test
+      projects: "**/*tests.csproj"
+      arguments: '--configuration $(BuildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=./coverage/opencover.xml  
 
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+  - task: DotNetCoreCLI@2
+    displayName: Publish
+    inputs:
+      command: publish
+      publishWebProjects: True
+      arguments: "--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory) -f net5.0 /p:AssemblyVersion=1.0.0.0"
+      zipAfterPublish: True
 
-- task: VSTest@2
-  inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+  - task: PublishBuildArtifacts@1
+    displayName: "Publish Artifact: $(Build.DefinitionName)-Artifact"
+    inputs:
+      ArtifactName: "$(Build.DefinitionName)-Artifact"      
+
